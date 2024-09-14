@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document, model } from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 import { IBoard } from '../interface/board';
+
+interface BoardModel extends mongoose.Model<IBoard> {
+    paginate(query: object, options: object): Promise<any>;
+}
 
 const boardSchema: Schema<IBoard> = new Schema(
     {
@@ -11,21 +16,16 @@ const boardSchema: Schema<IBoard> = new Schema(
             type: String,
             required: false,
         },
-        project: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Project', // Liên kết với model Project
-            required: true,
-        },
         members: [
             {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'User', // Liên kết với model User
+                ref: 'User',
             },
         ],
         lists: [
             {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'List', // Liên kết với model List
+                ref: 'List',
             },
         ],
     },
@@ -35,5 +35,7 @@ const boardSchema: Schema<IBoard> = new Schema(
     }
 );
 
-const Board = model<IBoard>('Board', boardSchema);
+boardSchema.plugin(mongoosePaginate)
+
+const Board = model<IBoard, BoardModel>('Board', boardSchema);
 export default Board;
