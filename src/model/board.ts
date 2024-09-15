@@ -18,9 +18,18 @@ const boardSchema: Schema<IBoard> = new Schema(
         },
         members: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User',
-            },
+                _id: false,
+                userId: {
+                    type: mongoose.Types.ObjectId,
+                    ref: 'User',
+                    required: true,
+                },
+                role: {
+                    type: String,
+                    enum: ['Admin', 'Member', 'Viewer'],
+                    default: 'Admin',
+                },
+            }
         ],
         lists: [
             {
