@@ -9,9 +9,8 @@ const cardSchema: Schema<ICard> = new Schema(
         },
         description: {
             type: String,
-            required: false,
         },
-        list: {
+        listId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'List',
             required: true,
@@ -24,35 +23,24 @@ const cardSchema: Schema<ICard> = new Schema(
         ],
         dueDate: {
             type: Date,
-            required: false,
+            default: ''
         },
         labels: [
             {
-                type: String,
-                required: false,
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Label',
             },
         ],
         attachments: [
             {
-                type: String,
-                required: false,
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Attachment',
             },
         ],
         comments: [
             {
-                user: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: 'User',
-                    required: true,
-                },
-                text: {
-                    type: String,
-                    required: true,
-                },
-                createdAt: {
-                    type: Date,
-                    default: Date.now,
-                },
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Comment',
             },
         ],
     },
