@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import Board from '../../model/Board';
+import { createError } from '../../utils/errorUtils';
 
 const getOneBoard = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -8,7 +9,8 @@ const getOneBoard = async (req: Request, res: Response, next: NextFunction) => {
         const board = await Board.findById(id).populate('members').populate('lists');
 
         if (!board) {
-            return res.status(404).json({ message: 'Board not found' });
+            const err = createError('Board not found', 404)
+            return next(err)
         }
 
         res.status(200).json(board);

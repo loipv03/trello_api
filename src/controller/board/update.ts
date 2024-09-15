@@ -1,15 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import Board from '../../model/Board';
 import { boardSchema } from '../../schema/board';
-import { ErrorResponse } from '../../middleware/errorMiddleware';
 import mongoose from 'mongoose';
+import { createError } from '../../utils/errorUtils'
 
 const updateBoard = async (req: Request, res: Response, next: NextFunction) => {
     const { error } = boardSchema.validate(req.body, { abortEarly: false });
     if (error) {
-        const err: ErrorResponse = new Error('Validation Error');
-        err.statusCode = 400;
-        err.errors = error.details.map(err => err.message);
+        const err = createError('Validation Error', 400, error.details.map(err => err.message));
         return next(err);
     }
 
