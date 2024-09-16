@@ -2,8 +2,6 @@ import mongoose, { Document } from "mongoose";
 
 export interface IComment extends Document {
     text: string;
-    user: mongoose.Types.ObjectId;
-    card: mongoose.Types.ObjectId;
-    createdAt: Date;
-    updatedAt: Date
+    userId: mongoose.Types.ObjectId;
+    cardId: mongoose.Types.ObjectId;
 }

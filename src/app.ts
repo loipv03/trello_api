@@ -7,6 +7,7 @@ import boardRouter from './router/board';
 import listRouter from './router/list';
 import cardRouter from './router/card';
 import labelRouter from './router/label';
+import commentRouter from './router/comment';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use('/api', boardRouter)
 app.use('/api', listRouter)
 app.use('/api', cardRouter)
 app.use('/api', labelRouter)
+app.use('/api', commentRouter)
 
 app.use(errorHandler);
 
