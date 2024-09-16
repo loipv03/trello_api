@@ -21,7 +21,10 @@ const createCard = async (req: Request, res: Response, next: NextFunction) => {
             return next(err);
         }
 
-        const newCard = await Card.create(req.body);
+        const newCard = await Card.create({
+            ...req.body as ICard,
+            startDate: new Date()
+        } as ICard);
         res.status(201).json({
             message: 'Create successfully',
             newCard

@@ -23,7 +23,7 @@ const cardSchema: Schema<ICard> = new Schema(
         ],
         startDate: {
             type: Date,
-            required: true,
+            default: Date.now
         },
         dueDate: {
             type: Date,

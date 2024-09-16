@@ -14,7 +14,6 @@ const labelSchema: Schema<ILabel> = new Schema(
         cardId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Card',
-            required: true,
         },
     },
     {
