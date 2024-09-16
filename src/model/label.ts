@@ -11,9 +11,9 @@ const labelSchema: Schema<ILabel> = new Schema(
             type: String,
             required: true,
         },
-        board: {
+        cardId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Board',
+            ref: 'Card',
             required: true,
         },
     },

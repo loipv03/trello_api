@@ -21,6 +21,10 @@ const cardSchema: Schema<ICard> = new Schema(
                 ref: 'User',
             },
         ],
+        startDate: {
+            type: Date,
+            required: true,
+        },
         dueDate: {
             type: Date,
             default: ''

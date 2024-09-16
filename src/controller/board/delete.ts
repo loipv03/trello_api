@@ -9,7 +9,7 @@ const deleteBoard = async (req: Request, res: Response, next: NextFunction) => {
         const { id } = req.params;
 
         if (!mongoose.Types.ObjectId.isValid(id)) {
-            const err = createError('Avatar and name are required', 400)
+            const err = createError('Invalid id', 400)
             return next(err);
         }
 

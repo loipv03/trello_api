@@ -16,8 +16,7 @@ const boardSchema = Joi.object({
     description: Joi.string()
         .optional(),
     members: Joi.array()
-        .items(memberSchema)
-        .optional(),
+        .items(memberSchema).min(1).required(),
     lists: Joi.array()
         .items(Joi.string().hex().length(24))
         .optional(),
