@@ -8,6 +8,7 @@ import listRouter from './router/list';
 import cardRouter from './router/card';
 import labelRouter from './router/label';
 import commentRouter from './router/comment';
+import atmRouter from './router/attachment';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api', listRouter)
 app.use('/api', cardRouter)
 app.use('/api', labelRouter)
 app.use('/api', commentRouter)
+app.use('/api', atmRouter)
 
 app.use(errorHandler);
 

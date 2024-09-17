@@ -19,7 +19,7 @@ const attachmentSchema: Schema<IAttachment> = new Schema(
             type: Number,
             required: true,
         },
-        card: {
+        cardId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Card',
             required: true,
