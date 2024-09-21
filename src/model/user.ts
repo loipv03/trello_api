@@ -20,10 +20,9 @@ const userSchema: Schema<IUser> = new Schema(
             required: true,
             minlength: 6,
         },
-        role: {
-            type: String,
-            enum: ['user', 'admin'],
-            default: 'user',
+        avatar: { type: String, default: '' },
+        isActive: {
+            type: Boolean, default: false
         },
     },
     {

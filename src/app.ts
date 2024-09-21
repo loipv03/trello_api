@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser'
 import connectDB from './config/database'
 import errorHandler from './middleware/errorMiddleware';
 import boardRouter from './router/board';
@@ -9,12 +10,15 @@ import cardRouter from './router/card';
 import labelRouter from './router/label';
 import commentRouter from './router/comment';
 import atmRouter from './router/attachment';
+import authRouter from './router/auth';
 
 dotenv.config();
 
 const mongoURI: string = process.env.MONGODB_URI as string;
 
 const app = express()
+
+app.use(cookieParser());
 
 app.use(express.json())
 app.use(cors())
@@ -25,6 +29,7 @@ app.use('/api', cardRouter)
 app.use('/api', labelRouter)
 app.use('/api', commentRouter)
 app.use('/api', atmRouter)
+app.use('/api', authRouter)
 
 app.use(errorHandler);
 
