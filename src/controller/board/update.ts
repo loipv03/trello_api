@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../../interface/user'
-import Board from '../../model/Board';
+import Board from '../../model/board';
 import { boardSchema, updateBoardSchema } from '../../schema/board';
 import mongoose from 'mongoose';
 import { createError } from '../../utils/errorUtils'

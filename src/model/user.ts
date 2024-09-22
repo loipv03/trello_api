@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { CallbackError, Schema, model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { IUser } from '../interface/user';
 
@@ -39,7 +39,7 @@ userSchema.pre<IUser>('save', async function (next) {
         this.password = await bcrypt.hash(this.password, salt);
         next();
     } catch (error) {
-        next(error);
+        next(error as CallbackError);
     }
 });
 

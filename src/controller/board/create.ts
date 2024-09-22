@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../../interface/user'
-import Board from '../../model/Board';
+import Board from '../../model/board';
 import List from '../../model/list';
 import { boardSchema } from '../../schema/board';
 import { createError } from '../../utils/errorUtils';

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import Board from '../../model/Board';
+import Board from '../../model/board';
 
 const getAllBoard = async (req: Request, res: Response, next: NextFunction) => {
     try {

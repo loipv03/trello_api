@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import Board from '../../model/Board';
+import Board from '../../model/board';
 import { createError } from '../../utils/errorUtils';
 
 const getOneBoard = async (req: Request, res: Response, next: NextFunction) => {

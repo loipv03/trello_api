@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import Board from '../../model/Board';
+import Board from '../../model/board';
 import mongoose from 'mongoose';
 import { createError } from '../../utils/errorUtils';
 

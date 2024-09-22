@@ -29,12 +29,12 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
         req.user_id = String(user._id);
         next();
     } catch (error) {
-        if (error.name === "JsonWebTokenError") {
+        if (error instanceof Error && error.name === "JsonWebTokenError") {
             errResponse = createError("Token không hợp lệ", 400)
             return next(errResponse)
         }
 
-        if (error.name === "TokenExpiredError") {
+        if (error instanceof Error && error.name === "TokenExpiredError") {
             errResponse = createError("Token đã hết hạn", 400)
             return next(errResponse)
         }
