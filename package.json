@@ -5,8 +5,7 @@
   "main": "./src/app.ts",
   "scripts": {
     "dev": "vite",
-    "build": "tsc",
-    "start": "node dist/app.ts"
+    "build": "tsc && vite build"
   },
   "keywords": [],
   "author": "",
