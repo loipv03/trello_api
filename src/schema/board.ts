@@ -6,8 +6,8 @@ const memberSchema = Joi.object({
         .length(24)
         .required(),
     role: Joi.string()
-        .valid('Admin', 'Member', 'Viewer')
-        .default('Admin')
+        .valid('admin', 'member', 'viewer')
+        .default('admin')
 });
 
 const boardSchema = Joi.object({
@@ -15,11 +15,14 @@ const boardSchema = Joi.object({
         .required(),
     description: Joi.string()
         .optional(),
-    members: Joi.array()
-        .items(memberSchema).min(1).required(),
     lists: Joi.array()
         .items(Joi.string().hex().length(24))
         .optional(),
 });
 
-export { boardSchema };
+const updateBoardSchema = boardSchema.keys({
+    members: Joi.array()
+        .items(memberSchema).min(1).required(),
+})
+
+export { boardSchema, updateBoardSchema };

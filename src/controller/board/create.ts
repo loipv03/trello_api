@@ -1,10 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../../interface/user'
 import Board from '../../model/Board';
 import List from '../../model/list';
 import { boardSchema } from '../../schema/board';
 import { createError } from '../../utils/errorUtils';
+import { IBoard } from '../../interface/board';
 
-const createBoard = async (req: Request, res: Response, next: NextFunction) => {
+const createBoard = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const userId: string = req.user_id as string
     const { error } = boardSchema.validate(req.body, { abortEarly: false });
     if (error) {
         const err = createError('Validation Error', 400, error.details.map(err => err.message))
@@ -12,7 +15,14 @@ const createBoard = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     try {
-        const newBoard = await Board.create(req.body);
+        const newBoard = await Board.create({
+            ...req.body,
+            members: [
+                {
+                    userId
+                }
+            ]
+        } as IBoard);
 
         const defaultLists = ['Todo', 'InProgress', 'Done'];
         const listIds: string[] = []

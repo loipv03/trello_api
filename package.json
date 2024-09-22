@@ -1,9 +1,10 @@
 {
   "name": "trello_api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/app.ts",
   "scripts": {
-    "dev": "vite"
+    "dev": "vite",
+    "start": "vite"
   },
   "keywords": [],
   "author": "",

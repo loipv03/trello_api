@@ -26,8 +26,8 @@ const signup = async (req: AuthenticatedRequest, res: Response, next: NextFuncti
 
         const emailExists = await User.findOne({ email });
         emailExists && duplicate_err_message.push("Email đã tồn tại")
-        if (duplicate_err_message) {
-            errResponse = createError("Duplicate1", 400, duplicate_err_message)
+        if (duplicate_err_message.length) {
+            errResponse = createError("Duplicate", 400, duplicate_err_message)
             return next(errResponse)
         }
 

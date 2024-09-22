@@ -1,33 +1,42 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../../interface/user'
 import Board from '../../model/Board';
-import { boardSchema } from '../../schema/board';
+import { boardSchema, updateBoardSchema } from '../../schema/board';
 import mongoose from 'mongoose';
 import { createError } from '../../utils/errorUtils'
+import { ErrorResponse } from '../../middleware/errorMiddleware';
+import { IBoard } from '../../interface/board';
 
-const updateBoard = async (req: Request, res: Response, next: NextFunction) => {
-    const { error } = boardSchema.validate(req.body, { abortEarly: false });
+const updateBoard = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const userId: string = req.user_id as string
+
+    let errResponse: ErrorResponse
+
+    const { error } = updateBoardSchema.validate(req.body, { abortEarly: false });
     if (error) {
-        const err = createError('Validation Error', 400, error.details.map(err => err.message));
-        return next(err);
+        errResponse = createError('Validation Error', 400, error.details.map(err => err.message));
+        return next(errResponse);
     }
 
     try {
         const { id } = req.params;
-        const updateData = req.body;
+        const updateData: IBoard = req.body as IBoard;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ message: 'Invalid board ID' });
-        }
-
-        const board = await Board.findByIdAndUpdate(id, updateData, { new: true });
+        const board = await Board.findOne({
+            _id: id,
+            members: { $elemMatch: { userId: userId, role: 'admin' } }
+        });
 
         if (!board) {
-            return res.status(404).json({ message: 'Board not found' });
+            errResponse = createError('Board not found or you do not have permission to edit.', 404)
+            return next(errResponse)
         }
+
+        const updateBoard = await Board.findByIdAndUpdate(id, updateData, { new: true });
 
         res.status(200).json({
             message: 'update successfully',
-            board
+            updateBoard
         });
     } catch (err) {
         next(err);
