@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, model } from 'mongoose';
+import mongoose, { Schema, model } from 'mongoose';
 import mongoosePaginate from 'mongoose-paginate-v2';
 import { IBoard } from '../interface/board';
 
