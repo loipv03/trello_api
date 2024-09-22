@@ -1,11 +1,12 @@
 {
+  "type": "module",
   "name": "trello_api",
   "version": "1.0.0",
   "main": "./src/app.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc",
-    "start": "node ./src/app.ts"
+    "start": "node dist/app.ts"
   },
   "keywords": [],
   "author": "",
