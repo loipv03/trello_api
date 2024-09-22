@@ -6,7 +6,7 @@ dotenv.config()
 
 export default defineConfig({
     server: {
-        port: Number(process.env.SERVER_PORT)
+        port: Number(process.env.PORT)
     },
     plugins: [
         ...VitePluginNode({
@@ -14,7 +14,6 @@ export default defineConfig({
             appPath: './src/app.ts',
             exportName: 'viteNodeApp',
             initAppOnBoot: false,
-
             tsCompiler: 'esbuild',
             swcOptions: {}
         })

@@ -33,6 +33,14 @@ app.use('/api', authRouter)
 
 app.use(errorHandler);
 
+const PORT = process.env.PORT || 3000;
+
+
+
 connectDB(mongoURI)
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 export const viteNodeApp = app
