@@ -11,6 +11,8 @@ import labelRouter from './router/label';
 import commentRouter from './router/comment';
 import atmRouter from './router/attachment';
 import authRouter from './router/auth';
+import cron from 'node-cron';
+import cronSchedule from './utils/cron'
 
 dotenv.config();
 
@@ -35,12 +37,20 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
+const startServer = async () => {
+    try {
+        await connectDB(mongoURI);
+        cron.schedule('* * * * *', cronSchedule);
 
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    } catch (err) {
+        console.error('Failed to start server:', err);
+        process.exit(1);
+    }
+};
 
-connectDB(mongoURI)
-
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+startServer();
 
 export const viteNodeApp = app
