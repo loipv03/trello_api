@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async (email: string, id: string) => {
-    const activationUrl = `http://localhost:8080/api/user/activate/${id}`;
+    const activationUrl = `https://trello-api-d3ov.onrender.com/api/user/activate/${id}`;
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
