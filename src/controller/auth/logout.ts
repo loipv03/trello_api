@@ -10,7 +10,7 @@ const logout = (req: AuthenticatedRequest, res: Response, next: NextFunction) =>
         const token = req.cookies?.access_token;
 
         if (!token) {
-            errResponse = createError("Người dùng chưa đăng nhập hoặc đã hết hạn phiên", 400)
+            errResponse = createError("Users have not logged in", 400)
             return next(errResponse)
         }
 
