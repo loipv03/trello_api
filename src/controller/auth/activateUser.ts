@@ -15,7 +15,7 @@ const activateUser = async (req: Request, res: Response, next: NextFunction) => 
         );
 
         if (!user) {
-            errResponse = createError('Account not found', 404)
+            errResponse = createError('Account not found or activated', 404)
             return next(errResponse)
         }
 
