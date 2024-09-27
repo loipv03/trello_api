@@ -27,7 +27,7 @@ const boardSchema: Schema<IBoard> = new Schema(
                 role: {
                     type: String,
                     enum: ['admin', 'member', 'viewer'],
-                    default: 'admin',
+                    default: 'member',
                 },
             }
         ],

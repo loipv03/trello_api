@@ -6,7 +6,7 @@ export interface IBoard extends Document {
     description?: string;
     members: {
         userId: mongoose.Types.ObjectId;
-        role: 'Admin' | 'Member' | 'Viewer';
+        role: 'admin' | 'member' | 'viewer';
     }[];
     lists: string[];
 }
