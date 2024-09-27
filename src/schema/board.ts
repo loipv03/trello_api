@@ -7,7 +7,7 @@ const memberSchema = Joi.object({
         .required(),
     role: Joi.string()
         .valid('admin', 'member', 'viewer')
-        .default('admin')
+        .default('member')
 });
 
 const boardSchema = Joi.object({

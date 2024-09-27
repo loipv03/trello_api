@@ -19,7 +19,8 @@ const createBoard = async (req: AuthenticatedRequest, res: Response, next: NextF
             ...req.body,
             members: [
                 {
-                    userId
+                    userId,
+                    role: 'admin'
                 }
             ]
         } as IBoard);
