@@ -1,6 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { NextFunction, Request } from 'express';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { createError } from '../utils/errorUtils';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,21 +12,23 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: async (req, file) => {
+    params: async (req: Request, _file) => {
+        const folder = req.path === '/uploadAvatar' ? 'avatar' : 'attachment'
         return {
-            folder: 'trello/attachment',
+            folder: `trello/${folder}`,
             allowed_formats: ['jpg', 'png', 'jpeg']
         }
     }
 });
 
-export const destroyImage = (public_id: string) => {
-    cloudinary.uploader.destroy(public_id, (err, result) => {
-        if (err) {
-            console.error('Error deleting image from Cloudinary:', err);
-        }
-    })
-}
+export const destroyImage = async (public_id: string, next: NextFunction) => {
+    try {
+        const result = await cloudinary.uploader.destroy(public_id);
+        return result;
+    } catch (error) {
+        return next(error)
+    }
+};
 
 const upload = multer({
     storage: storage,

@@ -23,7 +23,10 @@ const app = express()
 app.use(cookieParser());
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: true, // Cho phép tất cả các nguồn
+    credentials: true, // Cho phép gửi cookie từ mọi nguồn
+}))
 
 app.use('/api', boardRouter)
 app.use('/api', listRouter)
@@ -44,9 +47,11 @@ const startServer = async () => {
             await cronSchedule();
         });
 
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
+        if (process.env.NODE_ENV === 'production') {
+            app.listen(8081, () => {
+                console.log(`Server is running on port ${8081}`);
+            });
+        }
     } catch (err) {
         console.error('Failed to start server:', err);
         process.exit(1);

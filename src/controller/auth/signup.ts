@@ -5,6 +5,7 @@ import { Response, NextFunction } from 'express'
 import { createError } from '../../utils/errorUtils'
 import { ErrorResponse } from '../../middleware/errorMiddleware'
 import sendEmail from '../../config/mailer'
+import generateToken from '../../utils/jwtUtils'
 
 const signup = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const { name, email, } = req.body as IUser
@@ -14,19 +15,25 @@ const signup = async (req: AuthenticatedRequest, res: Response, next: NextFuncti
     }
 
     let errResponse: ErrorResponse
-    const { error } = userSchema.validate(req.body, { abortEarly: false })
-    if (error) {
-        errResponse = createError('Validation Error', 400, error.details.map(err => err.message))
-        return next(errResponse)
-    }
+
+    let duplicate_err_message: string[] = []
 
     try {
-        let duplicate_err_message: string[] = []
-        const userNameExists = await User.findOne({ name });
-        userNameExists && duplicate_err_message.push("Username has existed")
+        const { error } = userSchema.validate(req.body, { abortEarly: false })
+        if (error) {
+            errResponse = createError('Validation Error', 400, error.details.map(err => err.message))
+            return next(errResponse)
+        }
 
-        const emailExists = await User.findOne({ email });
-        emailExists && duplicate_err_message.push("Email has existed")
+        const userExists = await User.findOne({ $or: [{ name }, { email }] });
+        if (userExists) {
+            if (userExists.name === name) {
+                duplicate_err_message.push("Username has existed");
+            }
+            if (userExists.email === email) {
+                duplicate_err_message.push("Email has existed");
+            }
+        }
         if (duplicate_err_message.length) {
             errResponse = createError("Duplicate", 400, duplicate_err_message)
             return next(errResponse)
@@ -37,7 +44,11 @@ const signup = async (req: AuthenticatedRequest, res: Response, next: NextFuncti
             confirmPassword: undefined
         } as IBodySignup)
 
-        await sendEmail(email, String(newUser._id))
+        const origin = req.get('Origin')
+
+        const tokenActivate = generateToken(String(newUser._id), '1d')
+
+        await sendEmail(email, `${String(origin)}/activate/${tokenActivate}`)
 
         return res.status(200).json({
             message: 'Please check your email to activate your account'

@@ -1,19 +1,7 @@
-import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../../interface/user";
-import { ErrorResponse } from "../../middleware/errorMiddleware";
-import { createError } from "../../utils/errorUtils";
+import { Response, NextFunction, Request } from "express";
 
-const logout = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    let errResponse: ErrorResponse
-
+const logout = (_req: Request, res: Response, next: NextFunction) => {
     try {
-        const token = req.cookies?.access_token;
-
-        if (!token) {
-            errResponse = createError("Users have not logged in", 400)
-            return next(errResponse)
-        }
-
         res.clearCookie('access_token', {
             httpOnly: true,
             secure: true,

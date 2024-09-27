@@ -6,12 +6,12 @@ import User from "../model/user";
 import { ErrorResponse } from "./errorMiddleware";
 
 
-const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const authenticate = async (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
     let errResponse: ErrorResponse
 
     const token = req.cookies?.access_token;
     if (!token) {
-        errResponse = createError('Bạn phải đăng nhập để thực hiện hành động này', 401);
+        errResponse = createError('You must log in to perform this action.', 401);
         return next(errResponse);
     }
 
@@ -22,7 +22,7 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
 
         const user = await User.findById(payload?.user?._id);
         if (!user) {
-            errResponse = createError("Người dùng không tồn tại", 404);
+            errResponse = createError("User does not exist", 404);
             return next(errResponse);
         }
 
@@ -30,12 +30,12 @@ const authenticate = async (req: AuthenticatedRequest, res: Response, next: Next
         next();
     } catch (error) {
         if (error instanceof Error && error.name === "JsonWebTokenError") {
-            errResponse = createError("Token không hợp lệ", 400)
+            errResponse = createError("Invalid Token", 400)
             return next(errResponse)
         }
 
         if (error instanceof Error && error.name === "TokenExpiredError") {
-            errResponse = createError("Token đã hết hạn", 400)
+            errResponse = createError("Token has expired", 400)
             return next(errResponse)
         }
         next(error)
