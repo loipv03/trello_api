@@ -5,6 +5,7 @@ import { cardSchema } from '../../schema/card';
 import { createError } from '../../utils/errorUtils';
 import { IList } from '../../interface/list'
 import { ICard } from '../../interface/card';
+import Board from '../../model/board';
 
 const createCard = async (req: Request, res: Response, next: NextFunction) => {
     const { error } = cardSchema.validate(req.body, { abortEarly: false });
@@ -14,7 +15,7 @@ const createCard = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     try {
-        const { listId }: ICard = req.body
+        const { listId, boardId }: ICard = req.body
         const listExists = await List.findById({ _id: listId })
         if (!listExists) {
             const err = createError('List does not exist', 400)
@@ -32,6 +33,11 @@ const createCard = async (req: Request, res: Response, next: NextFunction) => {
 
         await List.findByIdAndUpdate(
             listId,
+            { $push: { cards: newCard._id } },
+            { new: true }
+        );
+        await Board.findByIdAndUpdate(
+            boardId,
             { $push: { cards: newCard._id } },
             { new: true }
         );

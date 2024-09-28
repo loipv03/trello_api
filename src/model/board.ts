@@ -37,6 +37,12 @@ const boardSchema: Schema<IBoard> = new Schema(
                 ref: 'List',
             },
         ],
+        cards: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Card',
+            },
+        ],
     },
     {
         timestamps: true,

@@ -4,6 +4,7 @@ export interface ICard extends Document {
     title: string;
     description?: string;
     listId: mongoose.Types.ObjectId;
+    boardId: mongoose.Types.ObjectId;
     members: string[];
     startDate: Date;
     dueDate?: Date;
