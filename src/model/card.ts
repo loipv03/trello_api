@@ -15,6 +15,11 @@ const cardSchema: Schema<ICard> = new Schema(
             ref: 'List',
             required: true,
         },
+        boardId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Board',
+            required: true,
+        },
         members: [
             {
                 type: mongoose.Schema.Types.ObjectId,

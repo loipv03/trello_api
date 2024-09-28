@@ -4,6 +4,7 @@ export const cardSchema = Joi.object({
     title: Joi.string().required(),
     description: Joi.string().allow(null, '').optional(),
     listId: Joi.string().required(),
+    boardId: Joi.string().required(),
     members: Joi.array().items(Joi.string()).optional(),
     dueDate: Joi.date().optional(),
     labels: Joi.array().items(Joi.string()).optional(),
