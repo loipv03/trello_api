@@ -16,6 +16,11 @@ const boardSchema: Schema<IBoard> = new Schema(
             type: String,
             required: false,
         },
+        workspaceId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Workspace',
+            required: true,
+        },
         members: [
             {
                 _id: false,

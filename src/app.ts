@@ -13,6 +13,7 @@ import atmRouter from './router/attachment';
 import authRouter from './router/auth';
 import cron from 'node-cron';
 import cronSchedule from './utils/cron'
+import workspaceRouter from './router/workspace';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use('/api', labelRouter)
 app.use('/api', commentRouter)
 app.use('/api', atmRouter)
 app.use('/api', authRouter)
+app.use('/api', workspaceRouter)
 
 app.use(errorHandler);
 

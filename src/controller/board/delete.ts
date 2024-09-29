@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import Board from '../../model/board';
 import mongoose from 'mongoose';
 import { createError } from '../../utils/errorUtils';
-import { IBoard } from '../../interface/board';
 import List from '../../model/list';
 import Card from '../../model/card';
 import Comment from '../../model/comment';
