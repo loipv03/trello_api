@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-const memberSchema = Joi.object({
+export const memberSchema = Joi.object({
     userId: Joi.string()
         .hex()
         .length(24)
@@ -15,6 +15,7 @@ const boardSchema = Joi.object({
         .required(),
     description: Joi.string()
         .optional(),
+    workspaceId: Joi.string().required(),
     lists: Joi.array()
         .items(Joi.string().hex().length(24))
         .optional(),

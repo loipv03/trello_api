@@ -6,7 +6,7 @@ const getOneBoard = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
 
-        const board = await Board.findById(id).populate('members').populate('lists');
+        const board = await Board.findById(id).populate('members').populate('lists').populate('cards');
 
         if (!board) {
             const err = createError('Board not found', 404)
