@@ -9,4 +9,5 @@ export interface IBoard extends Document {
         role: 'admin' | 'member' | 'viewer';
     }[];
     lists: string[];
+    cards: string[];
 }
