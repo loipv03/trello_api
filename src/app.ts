@@ -43,7 +43,7 @@ const PORT = process.env.PORT || 3000;
 const startServer = async () => {
     try {
         await connectDB(mongoURI);
-        cron.schedule('0 0 * * *', async () => {
+        cron.schedule('* * * * *', async () => {
             await cronSchedule();
         });
 
