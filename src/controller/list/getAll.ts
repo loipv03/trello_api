@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
-import Board from '../../model/board';
+import List from '../../model/list';
 
-const getAllBoard = async (req: Request, res: Response, next: NextFunction) => {
+const getAllList = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { page = 1, limit = 10 } = req.query;
 
-        const boards = await Board.paginate({}, { page: Number(page), limit: Number(limit) });
+        const lists = await List.paginate({}, { page: Number(page), limit: Number(limit) });
 
-        res.status(200).json(boards);
+        res.status(200).json(lists);
     } catch (err) {
         next(err);
     }
 }
 
-export default getAllBoard
+export default getAllList

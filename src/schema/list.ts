@@ -12,4 +12,4 @@ const listSchema = Joi.object({
         .optional()
 });
 
-export { listSchema };
+export default listSchema

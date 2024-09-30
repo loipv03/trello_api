@@ -1,22 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
-import Board from '../../model/board';
 import { createError } from '../../utils/errorUtils';
+import List from '../../model/list';
 
-const getOneBoard = async (req: Request, res: Response, next: NextFunction) => {
+const getOneList = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
 
-        const board = await Board.findById(id).populate('members').populate('lists');
+        const list = await List.findById(id).populate('cards');
 
-        if (!board) {
-            const err = createError('Board not found', 404)
+        if (!list) {
+            const err = createError('List not found', 404)
             return next(err)
         }
 
-        res.status(200).json(board);
+        res.status(200).json(list);
     } catch (err) {
         next(err);
     }
 };
 
-export default getOneBoard;
+export default getOneList;
