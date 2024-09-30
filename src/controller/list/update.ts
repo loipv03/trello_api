@@ -2,34 +2,43 @@ import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import List from '../../model/list';
 import { createError } from '../../utils/errorUtils';
+import { updateListSchema } from '../../schema/list';
+import { ErrorResponse } from '../../middleware/errorMiddleware';
 
 const updateList = async (req: Request, res: Response, next: NextFunction) => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
+    let errResponse: ErrorResponse
+
+    const { positions } = req.body;
+    const { id } = req.params
+
+    const { error } = updateListSchema.validate(req.body, { abortEarly: false })
+    if (error) {
+        errResponse = createError("Validation Error", 400, error.details.map(err => err.message))
+        return next(errResponse)
+    }
+
     try {
-        const { positions } = req.body;
-        const { id } = req.params
         const list = await List.findById(id);
         if (!list) {
             return next(createError('List not found', 404));
         }
-        const oldPosition = list.positions;
+        const oldPositions = list.positions;
 
+        const updateCondition = oldPositions < positions
+            ? { positions: { $gt: oldPositions, $lte: positions } }
+            : { positions: { $gte: positions, $lt: oldPositions } }
 
-        const updateCondition = oldPosition < positions
-            ? { positions: { $gt: oldPosition, $lte: positions } }
-            : { positions: { $gte: positions, $lt: oldPosition } }
+        const changePositions = oldPositions < positions ? -1 : 1
 
-        const changePositions = oldPosition < positions ? -1 : 1
+        await List.updateMany(updateCondition, { $inc: { positions: changePositions } }, { session })
 
-        await Promise.all([
-            List.findByIdAndUpdate(id, req.body, { new: true }).session(session),
-            List.updateMany(updateCondition, { $inc: { positions: changePositions } }, { session })
-        ])
+        const newList = await List.findByIdAndUpdate(id, req.body, { new: true }).session(session)
 
         await session.commitTransaction();
-        res.status(200).json({ message: 'List moved successfully', list: list });
+        res.status(200).json({ message: 'Update successfully', list: newList });
     } catch (err) {
         await session.abortTransaction();
         next(err);

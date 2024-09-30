@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import Card from '../../model/card';
 import List from '../../model/list';
-import { cardSchema } from '../../schema/card';
+import cardSchema from '../../schema/card';
 import { createError } from '../../utils/errorUtils';
-import { IList } from '../../interface/list'
 import { ICard } from '../../interface/card';
 import Board from '../../model/board';
 
@@ -22,9 +21,12 @@ const createCard = async (req: Request, res: Response, next: NextFunction) => {
             return next(err);
         }
 
+        const countCard = await Card.countDocuments({ boardId });
+
         const newCard = await Card.create({
             ...req.body as ICard,
-            startDate: new Date()
+            startDate: new Date(),
+            positions: countCard + 1
         } as ICard);
         res.status(201).json({
             message: 'Create successfully',

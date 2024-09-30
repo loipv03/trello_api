@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-export const cardSchema = Joi.object({
+const cardSchema = Joi.object({
     title: Joi.string().required(),
     description: Joi.string().allow(null, '').optional(),
     listId: Joi.string().required(),
@@ -11,3 +11,9 @@ export const cardSchema = Joi.object({
     attachments: Joi.array().items(Joi.string()).optional(),
     comments: Joi.array().items(Joi.string()).optional(),
 });
+
+export const updateCardSchema = cardSchema.keys({
+    position: Joi.number().required()
+})
+
+export default cardSchema
