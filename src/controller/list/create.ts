@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import List from '../../model/list';
 import Board from '../../model/board';
-import { listSchema } from '../../schema/list';
+import listSchema from '../../schema/list';
 import { createError } from '../../utils/errorUtils';
 import { IList } from '../../interface/list'
 
@@ -20,8 +20,12 @@ const createList = async (req: Request, res: Response, next: NextFunction) => {
             const err = createError('Board does not exist', 400)
             return next(err);
         }
+        const countList = await List.countDocuments({ boardId });
 
-        const newList = await List.create(req.body);
+        const newList = await List.create({
+            ...req.body,
+            positions: countList + 1
+        } as IList);
         res.status(201).json({
             message: 'Create successfully',
             newList

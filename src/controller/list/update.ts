@@ -1,37 +1,41 @@
 import { Request, Response, NextFunction } from 'express';
-import Board from '../../model/board';
-import { boardSchema } from '../../schema/board';
 import mongoose from 'mongoose';
-import { createError } from '../../utils/errorUtils'
+import List from '../../model/list';
+import { createError } from '../../utils/errorUtils';
 
-const updateBoard = async (req: Request, res: Response, next: NextFunction) => {
-    const { error } = boardSchema.validate(req.body, { abortEarly: false });
-    if (error) {
-        const err = createError('Validation Error', 400, error.details.map(err => err.message));
-        return next(err);
-    }
+const updateList = async (req: Request, res: Response, next: NextFunction) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-        const { id } = req.params;
-        const updateData = req.body;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ message: 'Invalid board ID' });
+        const { positions } = req.body;
+        const { id } = req.params
+        const list = await List.findById(id);
+        if (!list) {
+            return next(createError('List not found', 404));
         }
+        const oldPosition = list.positions;
 
-        const board = await Board.findByIdAndUpdate(id, updateData, { new: true });
 
-        if (!board) {
-            return res.status(404).json({ message: 'Board not found' });
-        }
+        const updateCondition = oldPosition < positions
+            ? { positions: { $gt: oldPosition, $lte: positions } }
+            : { positions: { $gte: positions, $lt: oldPosition } }
 
-        res.status(200).json({
-            message: 'update successfully',
-            board
-        });
+        const changePositions = oldPosition < positions ? -1 : 1
+
+        await Promise.all([
+            List.findByIdAndUpdate(id, req.body, { new: true }).session(session),
+            List.updateMany(updateCondition, { $inc: { positions: changePositions } }, { session })
+        ])
+
+        await session.commitTransaction();
+        res.status(200).json({ message: 'List moved successfully', list: list });
     } catch (err) {
+        await session.abortTransaction();
         next(err);
+    } finally {
+        session.endSession();
     }
-}
+};
 
-export default updateBoard
+export default updateList;

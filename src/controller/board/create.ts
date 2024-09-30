@@ -6,6 +6,7 @@ import { boardSchema } from '../../schema/board';
 import { createError } from '../../utils/errorUtils';
 import { IBoard } from '../../interface/board';
 import Workspace from '../../model/workspace';
+import { IList } from '../../interface/list';
 
 const createBoard = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId: string = req.user_id as string
@@ -30,8 +31,8 @@ const createBoard = async (req: AuthenticatedRequest, res: Response, next: NextF
         const defaultLists = ['Todo', 'InProgress', 'Done'];
         const listIds: string[] = []
 
-        for (const listName of defaultLists) {
-            const list = await List.create({ name: listName, boardId: newBoard._id });
+        for (const [index, listName] of defaultLists.entries()) {
+            const list = await List.create({ name: listName, boardId: newBoard._id, positions: Number(index) + 1 } as IList);
             listIds.push(String(list._id));
         }
 

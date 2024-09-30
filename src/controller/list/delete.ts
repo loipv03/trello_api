@@ -1,29 +1,73 @@
 import { Request, Response, NextFunction } from 'express';
-import Board from '../../model/board';
 import mongoose from 'mongoose';
 import { createError } from '../../utils/errorUtils';
+import List from '../../model/list';
+import { IList } from '../../interface/list';
+import { ErrorResponse } from '../../middleware/errorMiddleware'
+import Comment from '../../model/comment';
+import Label from '../../model/label';
+import Attachment from '../../model/attachment';
+import { IAttachment } from '../../interface/attachment';
+import { destroyImage } from '../../config/cloudinary';
+import Card from '../../model/card';
 
 
-const deleteBoard = async (req: Request, res: Response, next: NextFunction) => {
+const deleteList = async (req: Request, res: Response, next: NextFunction) => {
+    let errResponse: ErrorResponse
+    const session = await mongoose.startSession()
+    session.startTransaction()
     try {
         const { id } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            const err = createError('Avatar and name are required', 400)
-            return next(err);
+        const list = await List.findById<IList>(id).populate('cards').session(session)
+
+        if (!list) {
+            errResponse = createError('List not found', 404);
+            return next(errResponse);
         }
 
-        const result = await Board.findByIdAndDelete(id);
+        const idCards = list.cards.map(card => String(card._id))
 
-        if (!result) {
-            const err = createError('Board not found', 404)
-            return next(err);
+        await Promise.all([
+            Comment.deleteMany({ cardId: { $in: idCards } }).session(session),
+            Label.deleteMany({ cardId: { $in: idCards } }).session(session)
+        ]);
+
+        const attachments = await Attachment.find({ cardId: { $in: idCards } }).session(session) as unknown as IAttachment[];
+        const AttachmentURLs = attachments.map(attachment => attachment.url);
+
+        if (AttachmentURLs.length) {
+            for (const url of AttachmentURLs) {
+                const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
+                const result = await destroyImage(publicId, next);
+
+                if (result.result !== 'ok') {
+                    await session.abortTransaction();
+                    return next(createError('Failed to delete old avatar', 400));
+                }
+            }
         }
 
-        res.status(200).json({ message: 'Board deleted successfully' });
+        const listPosition = list.positions;
+        await Promise.all([
+            Attachment.deleteMany({ cardId: { $in: idCards } }).session(session),
+            Card.deleteMany({ listId: id }).session(session),
+            List.findByIdAndDelete(id).session(session),
+            List.updateMany(
+                { positions: { $gt: listPosition } },
+                { $inc: { positions: -1 } },
+                { session }
+            )
+        ]);
+
+        await session.commitTransaction();
+        res.status(200).json({ message: 'List deleted successfully' });
     } catch (err) {
+        await session.abortTransaction()
         next(err);
+    } finally {
+        session.endSession()
     }
 }
 
-export default deleteBoard
+export default deleteList
