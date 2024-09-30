@@ -12,4 +12,8 @@ const listSchema = Joi.object({
         .optional()
 });
 
+export const updateListSchema = listSchema.keys({
+    positions: Joi.number().required(),
+})
+
 export default listSchema

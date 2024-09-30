@@ -1,5 +1,11 @@
 import mongoose, { Schema, model } from 'mongoose';
 import { ICard } from '../interface/card';
+import mongoosePaginateV2 from 'mongoose-paginate-v2'
+
+interface CardModel extends mongoose.Model<ICard> {
+    paginate(query: object, options: object): Promise<any>;
+}
+
 
 const cardSchema: Schema<ICard> = new Schema(
     {
@@ -9,6 +15,10 @@ const cardSchema: Schema<ICard> = new Schema(
         },
         description: {
             type: String,
+        },
+        positions: {
+            type: Number,
+            required: true
         },
         listId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -59,5 +69,7 @@ const cardSchema: Schema<ICard> = new Schema(
     }
 );
 
-const Card = model<ICard>('Card', cardSchema);
+cardSchema.plugin(mongoosePaginateV2)
+
+const Card = model<ICard, CardModel>('Card', cardSchema);
 export default Card;
