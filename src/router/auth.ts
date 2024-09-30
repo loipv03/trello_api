@@ -10,5 +10,6 @@ authRouter.post('/login', authControlllers.login)
 authRouter.post('/logout', authenticate, authControlllers.logout)
 authRouter.patch('/uploadAvatar', authenticate, upload.single('avatar'), authControlllers.uploadAvatar)
 authRouter.get('/activate/?:token', authControlllers.activateUser)
+authRouter.get('/users/search', authControlllers.searchUser)
 
 export default authRouter
