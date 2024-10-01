@@ -6,10 +6,10 @@ import { updateListSchema } from '../../schema/list';
 import { ErrorResponse } from '../../middleware/errorMiddleware';
 
 const updateList = async (req: Request, res: Response, next: NextFunction) => {
+    let errResponse: ErrorResponse
+
     const session = await mongoose.startSession();
     session.startTransaction();
-
-    let errResponse: ErrorResponse
 
     const { positions } = req.body;
     const { id } = req.params
@@ -33,9 +33,10 @@ const updateList = async (req: Request, res: Response, next: NextFunction) => {
 
         const changePositions = oldPositions < positions ? -1 : 1
 
-        await List.updateMany(updateCondition, { $inc: { positions: changePositions } }, { session })
-
-        const newList = await List.findByIdAndUpdate(id, req.body, { new: true }).session(session)
+        const [_, newList] = await Promise.all([
+            List.updateMany(updateCondition, { $inc: { positions: changePositions } }, { session }),
+            List.findByIdAndUpdate(id, req.body, { new: true }).session(session),
+        ])
 
         await session.commitTransaction();
         res.status(200).json({ message: 'Update successfully', list: newList });

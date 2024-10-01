@@ -10,6 +10,7 @@ import Attachment from '../../model/attachment';
 import { IAttachment } from '../../interface/attachment';
 import { destroyImage } from '../../config/cloudinary';
 import Card from '../../model/card';
+import Board from '../../model/board';
 
 
 const deleteList = async (req: Request, res: Response, next: NextFunction) => {
@@ -28,16 +29,16 @@ const deleteList = async (req: Request, res: Response, next: NextFunction) => {
 
         const idCards = list.cards.map(card => String(card._id))
 
-        await Promise.all([
+        const [_comment, _label, attachments] = await Promise.all([
             Comment.deleteMany({ cardId: { $in: idCards } }).session(session),
-            Label.deleteMany({ cardId: { $in: idCards } }).session(session)
+            Label.deleteMany({ cardId: { $in: idCards } }).session(session),
+            Attachment.find({ cardId: { $in: idCards } }).session(session) as unknown as IAttachment[]
         ]);
 
-        const attachments = await Attachment.find({ cardId: { $in: idCards } }).session(session) as unknown as IAttachment[];
-        const AttachmentURLs = attachments.map(attachment => attachment.url);
+        const attachmentURLs = attachments.map(attachment => attachment.url);
 
-        if (AttachmentURLs.length) {
-            for (const url of AttachmentURLs) {
+        if (attachmentURLs.length) {
+            attachmentURLs.map(async (url) => {
                 const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
                 const result = await destroyImage(publicId, next);
 
@@ -45,20 +46,27 @@ const deleteList = async (req: Request, res: Response, next: NextFunction) => {
                     await session.abortTransaction();
                     return next(createError('Failed to delete old avatar', 400));
                 }
-            }
+            })
         }
 
         const listPosition = list.positions;
         await Promise.all([
             Attachment.deleteMany({ cardId: { $in: idCards } }).session(session),
-            Card.deleteMany({ listId: id }).session(session),
             List.findByIdAndDelete(id).session(session),
+        ]);
+
+        await Promise.all([
+            Card.deleteMany({ listId: id }).session(session),
             List.updateMany(
                 { positions: { $gt: listPosition } },
                 { $inc: { positions: -1 } },
                 { session }
-            )
-        ]);
+            ),
+            Board.updateMany(
+                { lists: id },
+                { $pull: { lists: id } }
+            ).session(session),
+        ])
 
         await session.commitTransaction();
         res.status(200).json({ message: 'List deleted successfully' });
