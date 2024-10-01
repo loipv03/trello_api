@@ -10,6 +10,7 @@ import Attachment from '../../model/attachment';
 import { ICard } from '../../interface/card';
 import { IAttachment } from '../../interface/attachment';
 import { destroyImage } from '../../config/cloudinary';
+import Workspace from '../../model/workspace';
 
 const deleteBoard = async (req: Request, res: Response, next: NextFunction) => {
     const session = await mongoose.startSession();
@@ -26,16 +27,15 @@ const deleteBoard = async (req: Request, res: Response, next: NextFunction) => {
 
         const idcards = (board.cards as unknown as ICard[]).map(card => card._id) as string[];
 
-        // Xóa comments và labels
-        await Comment.deleteMany({ cardId: { $in: idcards } }).session(session);
-        await Label.deleteMany({ cardId: { $in: idcards } }).session(session);
-
-        // Lấy các attachment
-        const attachments = await Attachment.find({ cardId: { $in: idcards } }).session(session) as unknown as IAttachment[];
+        const [_comment, _label, attachments] = await Promise.all([
+            Comment.deleteMany({ cardId: { $in: idcards } }).session(session),
+            Label.deleteMany({ cardId: { $in: idcards } }).session(session),
+            Attachment.find({ cardId: { $in: idcards } }).session(session) as unknown as IAttachment[]
+        ])
         const AttachmentURLs = attachments.map(attachment => attachment.url);
 
         if (AttachmentURLs.length) {
-            for (const url of AttachmentURLs) {
+            AttachmentURLs.map(async (url) => {
                 const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
                 const result = await destroyImage(publicId, next);
 
@@ -43,20 +43,27 @@ const deleteBoard = async (req: Request, res: Response, next: NextFunction) => {
                     await session.abortTransaction();
                     return next(createError('Failed to delete old avatar', 400));
                 }
-            }
+            })
         }
 
-        // Xóa attachments
         await Attachment.deleteMany({ cardId: { $in: idcards } }).session(session);
-        // Xóa cards và lists
-        await Card.deleteMany({ boardId: id }).session(session);
-        await List.deleteMany({ boardId: id }).session(session);
-        // Xóa board
+
+        await Promise.all([
+            Card.deleteMany({ boardId: id }).session(session),
+            List.deleteMany({ boardId: id }).session(session),
+            Workspace.updateMany(
+                { boards: id },
+                { $pull: { boards: id } }
+            ).session(session),
+        ])
+
         await Board.findByIdAndDelete(id).session(session);
 
-        // Commit transaction
         await session.commitTransaction();
-        res.status(200).json({ message: 'Board deleted successfully' });
+
+        res.status(200).json({
+            message: 'Board deleted successfully'
+        });
     } catch (err) {
         await session.abortTransaction();
         next(err);
