@@ -29,33 +29,31 @@ const deleteList = async (req: Request, res: Response, next: NextFunction) => {
 
         const idCards = list.cards.map(card => String(card._id))
 
-        const [_comment, _label, attachments] = await Promise.all([
-            Comment.deleteMany({ cardId: { $in: idCards } }).session(session),
-            Label.deleteMany({ cardId: { $in: idCards } }).session(session),
-            Attachment.find({ cardId: { $in: idCards } }).session(session) as unknown as IAttachment[]
-        ]);
+
+        const attachments = await Attachment.find({ cardId: { $in: idCards } }).session(session) as unknown as IAttachment[]
 
         const attachmentURLs = attachments.map(attachment => attachment.url);
 
         if (attachmentURLs.length) {
-            attachmentURLs.map(async (url) => {
-                const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
-                const result = await destroyImage(publicId, next);
+            await Promise.all(
+                attachmentURLs.map(async (url) => {
+                    const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
+                    const result = await destroyImage(publicId, next);
 
-                if (result.result !== 'ok') {
-                    await session.abortTransaction();
-                    return next(createError('Failed to delete old avatar', 400));
-                }
-            })
+                    if (result.result !== 'ok') {
+                        return next(createError('Failed to delete old avatar', 400));
+                    }
+                })
+            )
         }
 
         const listPosition = list.positions;
-        await Promise.all([
-            Attachment.deleteMany({ cardId: { $in: idCards } }).session(session),
-            List.findByIdAndDelete(id).session(session),
-        ]);
 
         await Promise.all([
+            Comment.deleteMany({ cardId: { $in: idCards } }).session(session),
+            Label.deleteMany({ cardId: { $in: idCards } }).session(session),
+            Attachment.deleteMany({ cardId: { $in: idCards } }).session(session),
+            List.findByIdAndDelete(id).session(session),
             Card.deleteMany({ listId: id }).session(session),
             List.updateMany(
                 { positions: { $gt: listPosition } },
