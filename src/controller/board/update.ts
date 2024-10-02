@@ -8,19 +8,18 @@ import { IBoard } from '../../interface/board';
 import User from '../../model/user';
 
 const updateBoard = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const userId: string = req.user_id as string
-
     let errResponse: ErrorResponse
 
-    const { error } = updateBoardSchema.validate(req.body, { abortEarly: false });
-    if (error) {
-        errResponse = createError('Validation Error', 400, error.details.map(err => err.message));
-        return next(errResponse);
-    }
-
     try {
+        const userId: string = req.user_id as string
         const { id } = req.params;
         const board: IBoard = req.body as IBoard;
+
+        const { error } = updateBoardSchema.validate(board, { abortEarly: false });
+        if (error) {
+            errResponse = createError('Validation Error', 400, error.details.map(err => err.message));
+            return next(errResponse);
+        }
 
         const userIds = board.members.map(member => member.userId.toString())
 
