@@ -11,53 +11,56 @@ import { ICard } from '../../interface/card';
 import { IAttachment } from '../../interface/attachment';
 import { destroyImage } from '../../config/cloudinary';
 import Workspace from '../../model/workspace';
+import { ErrorResponse } from '../../middleware/errorMiddleware';
 
 const deleteBoard = async (req: Request, res: Response, next: NextFunction) => {
     const session = await mongoose.startSession();
     session.startTransaction();
+
+    let errResponse: ErrorResponse
 
     try {
         const { id } = req.params;
 
         const board = await Board.findById(id).populate('lists').populate('cards').session(session);
         if (!board) {
-            const err = createError('Board not found', 404);
-            return next(err);
+            errResponse = createError('Board not found', 404);
+            return next(errResponse);
         }
 
         const idcards = (board.cards as unknown as ICard[]).map(card => card._id) as string[];
 
-        const [_comment, _label, attachments] = await Promise.all([
-            Comment.deleteMany({ cardId: { $in: idcards } }).session(session),
-            Label.deleteMany({ cardId: { $in: idcards } }).session(session),
-            Attachment.find({ cardId: { $in: idcards } }).session(session) as unknown as IAttachment[]
-        ])
+        const attachments = await Attachment.find({ cardId: { $in: idcards } }).session(session) as unknown as IAttachment[]
+
         const AttachmentURLs = attachments.map(attachment => attachment.url);
 
         if (AttachmentURLs.length) {
-            AttachmentURLs.map(async (url) => {
-                const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
-                const result = await destroyImage(publicId, next);
+            await Promise.all(
+                AttachmentURLs.map(async (url) => {
+                    const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
+                    const result = await destroyImage(publicId, next)
 
-                if (result.result !== 'ok') {
-                    await session.abortTransaction();
-                    return next(createError('Failed to delete old avatar', 400));
-                }
-            })
+                    if (result.result !== 'ok') {
+                        errResponse = createError('Failed to delete old avatar', 400)
+                        return next(errResponse);
+                    }
+                })
+            )
         }
 
-        await Attachment.deleteMany({ cardId: { $in: idcards } }).session(session);
 
         await Promise.all([
+            Attachment.deleteMany({ cardId: { $in: idcards } }).session(session),
+            Comment.deleteMany({ cardId: { $in: idcards } }).session(session),
+            Label.deleteMany({ cardId: { $in: idcards } }).session(session),
             Card.deleteMany({ boardId: id }).session(session),
             List.deleteMany({ boardId: id }).session(session),
             Workspace.updateMany(
                 { boards: id },
                 { $pull: { boards: id } }
             ).session(session),
+            await Board.findByIdAndDelete(id).session(session),
         ])
-
-        await Board.findByIdAndDelete(id).session(session);
 
         await session.commitTransaction();
 
