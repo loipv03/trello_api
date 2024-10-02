@@ -10,12 +10,15 @@ import Attachment from '../../model/attachment';
 import { IAttachment } from '../../interface/attachment';
 import { destroyImage } from '../../config/cloudinary';
 import Card from '../../model/card';
+import Board from '../../model/board';
 
 
 const deleteCard = async (req: Request, res: Response, next: NextFunction) => {
     let errResponse: ErrorResponse
+
     const session = await mongoose.startSession()
     session.startTransaction()
+
     try {
         const { id } = req.params;
 
@@ -26,28 +29,27 @@ const deleteCard = async (req: Request, res: Response, next: NextFunction) => {
             return next(errResponse);
         }
 
-        await Promise.all([
-            Comment.deleteMany({ cardId: id }).session(session),
-            Label.deleteMany({ cardId: id }).session(session)
-        ]);
-
         const attachments = await Attachment.find({ cardId: id }).session(session) as unknown as IAttachment[];
-        const AttachmentURLs = attachments.map(attachment => attachment.url);
+        const attachmentURLs = attachments.map(attachment => attachment.url);
 
-        if (AttachmentURLs.length) {
-            for (const url of AttachmentURLs) {
-                const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
-                const result = await destroyImage(publicId, next);
+        if (attachmentURLs.length) {
+            await Promise.all(
+                attachmentURLs.map(async (url) => {
+                    const publicId = url.replace(/https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/[^/]+\//, '').replace(/\.[^.]+$/, '');
+                    const result = await destroyImage(publicId, next);
 
-                if (result.result !== 'ok') {
-                    await session.abortTransaction();
-                    return next(createError('Failed to delete old avatar', 400));
-                }
-            }
+                    if (result.result !== 'ok') {
+                        errResponse = createError('Failed to delete old avatar', 400)
+                        return next(errResponse);
+                    }
+                })
+            )
         }
 
         const cardPosition = card.positions;
         await Promise.all([
+            Comment.deleteMany({ cardId: id }).session(session),
+            Label.deleteMany({ cardId: id }).session(session),
             Attachment.deleteMany({ cardId: id }).session(session),
             Card.findByIdAndDelete(id).session(session),
             List.findByIdAndDelete(id).session(session),
@@ -55,11 +57,22 @@ const deleteCard = async (req: Request, res: Response, next: NextFunction) => {
                 { positions: { $gt: cardPosition } },
                 { $inc: { positions: -1 } },
                 { session }
-            )
+            ),
+            List.updateMany(
+                { cards: id },
+                { $pull: { cards: id } }
+            ).session(session),
+            Board.updateMany(
+                { cards: id },
+                { $pull: { cards: id } }
+            ).session(session),
         ]);
 
         await session.commitTransaction();
-        res.status(200).json({ message: 'List deleted successfully' });
+        res.status(200).json({
+            message: 'List deleted successfully'
+        });
+
     } catch (err) {
         await session.abortTransaction()
         next(err);
