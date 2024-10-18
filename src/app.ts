@@ -25,8 +25,8 @@ app.use(cookieParser());
 
 app.use(express.json())
 app.use(cors({
-    origin: true, // Cho phép tất cả các nguồn
-    credentials: true, // Cho phép gửi cookie từ mọi nguồn
+    origin: 'http://localhost:3000',
+    credentials: true,
 }))
 
 app.use('/api', boardRouter)
