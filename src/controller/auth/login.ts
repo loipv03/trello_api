@@ -37,13 +37,13 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
         res.cookie('access_token', access_token, {
             httpOnly: true,
             secure: false,
-            sameSite: 'none'
+            sameSite: 'lax'
         });
 
         res.cookie('refresh_token', refresh_Token, {
             httpOnly: true,
             secure: false,
-            sameSite: 'none'
+            sameSite: 'lax'
         });
 
         return res.status(200).json({
