@@ -36,13 +36,13 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
 
         res.cookie('access_token', access_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV !== 'production',
             sameSite: 'none'
         });
 
         res.cookie('refresh_token', refresh_Token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV !== 'production',
             sameSite: 'none'
         });
 
