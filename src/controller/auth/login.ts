@@ -38,6 +38,7 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
             httpOnly: true,
             secure: true,
             sameSite: 'none',
+            path: '/',
             maxAge: 24 * 60 * 60 * 1000
         });
 
@@ -45,6 +46,7 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
             httpOnly: true,
             secure: true,
             sameSite: 'none',
+            path: '/',
             maxAge: 24 * 60 * 60 * 1000
         });
 
