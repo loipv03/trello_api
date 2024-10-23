@@ -5,13 +5,17 @@ const logout = (_req: Request, res: Response, next: NextFunction) => {
         res.clearCookie('access_token', {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
+            path: '/',
+            maxAge: 1 * 24 * 60 * 60 * 1000
         });
 
         res.clearCookie('refresh_token', {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
+            path: '/',
+            maxAge: 1 * 24 * 60 * 60 * 1000
         });
 
         return res.status(200).json({

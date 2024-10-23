@@ -25,7 +25,7 @@ app.use(cookieParser());
 
 app.use(express.json())
 app.use(cors({
-    origin: 'https://trello-app-1.vercel.app',
+    origin: ['https://trello-app-loi03.vercel.app', 'http://localhost:3000'],
     credentials: true,
 }))
 
