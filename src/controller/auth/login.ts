@@ -39,7 +39,6 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
             secure: true,
             sameSite: 'none',
             path: '/',
-            domain: ".onrender.com",
             maxAge: 1 * 24 * 60 * 60 * 1000
         });
 
@@ -48,7 +47,6 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
             secure: true,
             sameSite: 'none',
             path: '/',
-            domain: ".onrender.com",
             maxAge: 1 * 24 * 60 * 60 * 1000
         });
 
