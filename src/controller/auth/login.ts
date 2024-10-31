@@ -51,6 +51,10 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
         });
 
         return res.status(200).json({
+            data: {
+                access_token,
+                refresh_Token
+            },
             message: 'Login success',
         });
     } catch (error) {
