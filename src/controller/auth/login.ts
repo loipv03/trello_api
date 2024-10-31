@@ -31,7 +31,7 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
         }
 
         const access_token = generateToken(String(user?._id), '15m')
-        const refresh_Token = generateToken(String(user?._id), '7d')
+        const refresh_token = generateToken(String(user?._id), '7d')
 
 
         res.cookie('access_token', access_token, {
@@ -42,7 +42,7 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
             maxAge: 1 * 24 * 60 * 60 * 1000
         });
 
-        res.cookie('refresh_token', refresh_Token, {
+        res.cookie('refresh_token', refresh_token, {
             httpOnly: true,
             secure: true,
             sameSite: 'none',
@@ -53,7 +53,7 @@ const login = async (req: AuthenticatedRequest, res: Response, next: NextFunctio
         return res.status(200).json({
             data: {
                 access_token,
-                refresh_Token
+                refresh_token
             },
             message: 'Login success',
         });
