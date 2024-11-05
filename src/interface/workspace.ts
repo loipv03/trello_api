@@ -8,6 +8,4 @@ export interface IWorkspace extends Document {
         userId: mongoose.Types.ObjectId;
         role: 'admin' | 'member' | 'viewer';
     }[];
-    createdAt: Date;
-    updatedAt: Date;
 }
