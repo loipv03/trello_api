@@ -5,11 +5,7 @@ const getAllList = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { page = 1, limit = 10 } = req.query;
 
-<<<<<<< Updated upstream
-        const lists = await List.paginate({}, { page: Number(page), limit: Number(limit) });
-=======
-        const { docs: boards } = await Board.paginate({}, { page: Number(page), limit: Number(limit) });
->>>>>>> Stashed changes
+        const { docs: lists } = await List.paginate({}, { page: Number(page), limit: Number(limit) });
 
         res.status(200).json(lists);
     } catch (err) {
