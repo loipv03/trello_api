@@ -9,7 +9,8 @@ import { ErrorResponse } from "./errorMiddleware";
 const authenticate = async (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
     let errResponse: ErrorResponse
 
-    const token = req.cookies?.access_token;
+    const token = req.headers.authorization?.split(" ")[1]
+
     if (!token) {
         errResponse = createError('You must log in to perform this action.', 401);
         return next(errResponse);
