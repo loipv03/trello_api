@@ -7,7 +7,6 @@ const authRouter = express.Router()
 
 authRouter.post('/signup', authControlllers.signup)
 authRouter.post('/login', authControlllers.login)
-authRouter.post('/logout', authenticate, authControlllers.logout)
 authRouter.patch('/upload_avatar', authenticate, upload.single('avatar'), authControlllers.uploadAvatar)
 authRouter.get('/activate/?:token', authControlllers.activateUser)
 authRouter.get('/users/search', authControlllers.searchUser)

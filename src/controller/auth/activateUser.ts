@@ -31,28 +31,12 @@ const activateUser = async (req: Request, res: Response, next: NextFunction) => 
         const access_token = generateToken(String(user?._id), '15m')
         const refresh_token = generateToken(String(user?._id), '7d')
 
-        res.cookie('access_token', access_token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            path: '/',
-            maxAge: 1 * 24 * 60 * 60 * 1000
-        });
-
-        res.cookie('refresh_token', refresh_token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            path: '/',
-            maxAge: 1 * 24 * 60 * 60 * 1000
-        });
-
         return res.status(200).json({
+            message: "Account activation successful",
             data: {
                 access_token,
                 refresh_token
             },
-            message: "Account activation successful."
         });
     } catch (error) {
         if (error instanceof Error && error.name === "JsonWebTokenError") {

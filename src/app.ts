@@ -25,7 +25,7 @@ app.use(cookieParser());
 
 app.use(express.json())
 app.use(cors({
-    origin: ['https://trello-app-loi03.vercel.app', 'http://localhost:3000', "https://trello-app-8bgh.onrender.com"],
+    origin: ['http://localhost:3000', "https://trello-app-8bgh.onrender.com"],
     credentials: true,
 }))
 
